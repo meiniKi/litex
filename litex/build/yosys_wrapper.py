@@ -74,14 +74,26 @@ class YosysWrapper():
             a string containing all read_xxx lines
         """
         includes = ""
-        reads = []
+        reads_frontend = []
+        reads_native = []
         for path in self._platform.verilog_include_paths:
             includes += " -I" + path
         for filename, language, library, *copy in self._platform.sources:
             # yosys has no such function read_systemverilog
-            if language == "systemverilog" or language == "verilog":
+            file = filename.split("/")[-1]
+            if (self._build_name not in file) and (language == "systemverilog" or language == "verilog"):
                 language = "systemverilog -defer -noassert"
-            reads.append(f"read_{language}{includes} {filename}")
+                reads_frontend.append(f"read_{language}{includes} {filename}")
+                continue
+            elif language == "systemverilog" or language == "verilog":
+                language = "verilog -sv"
+                
+            reads_native.append(f"read_{language}{includes} {filename}")
+        
+        # First read all files through front-end, then elaborate and add
+        # pure verilog files. In the tests, the front-end remove primitives like 
+        # the PLL
+        reads = [*reads_frontend, "read_systemverilog -link", *reads_native]            
         return "\n".join(reads)
 
     _default_template = [
