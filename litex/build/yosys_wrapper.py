@@ -92,6 +92,7 @@ class YosysWrapper():
         "verilog_defaults -pop",
         "attrmap -tocase keep -imap keep=\"true\" keep=1 -imap keep=\"false\" keep=0 -remove keep=0",
         "{yosys_cmds}",
+        "read_systemverilog -link",
         "synth_{target} {synth_opts} -top {build_name}",
         "write_{write_fmt} {write_opts} {output_name}.{synth_fmt}",
     ]
