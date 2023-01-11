@@ -75,7 +75,6 @@ vpath %.a $(PACKAGES:%=../%)
 
 %.elf: crt0.o $(LIBS:%=%.a)
 	$(CC) $(LDFLAGS) -T $(BIOS_DIRECTORY)/$(LSCRIPT) -N -o $@ \
-		crt0.o \
 		$(OBJECTS) \
 		$(PACKAGES:%=-L../%) \
 		-Wl,--whole-archive \
