@@ -19,7 +19,8 @@ OBJECTS = boot-helper.o	\
 	  cmd_litesdcard.o  \
 	  cmd_litesata.o    \
 	  sim_debug.o		\
-	  main.o
+	  main.o 			\
+	  crt0.o
 
 ifneq "$(or $(BIOS_CONSOLE_NO_AUTOCOMPLETE),$(BIOS_CONSOLE_LITE))" ""
 CFLAGS += -DBIOS_CONSOLE_NO_AUTOCOMPLETE
@@ -48,6 +49,10 @@ else ifeq ($(CPU), zynqmp)
 LSCRIPT = linker-zynqmp.ld
 else
 LSCRIPT = linker.ld
+endif
+
+ifeq ($(CPU), blackparrot)
+OBJECTS += mul.o
 endif
 
 all: bios.bin

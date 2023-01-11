@@ -23,7 +23,7 @@ def language_by_filename(name):
         return "verilog"
     elif extension in ["vhd", "vhdl", "vho"]:
         return "vhdl"
-    elif extension in ["sv", "svo"]:
+    elif extension in ["sv", "svo", "svh"]:
         return "systemverilog"
     return None
 

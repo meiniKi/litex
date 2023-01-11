@@ -79,18 +79,20 @@ class YosysWrapper():
             includes += " -I" + path
         for filename, language, library, *copy in self._platform.sources:
             # yosys has no such function read_systemverilog
-            if language == "systemverilog":
-                language = "verilog -sv"
+            if language == "systemverilog" or language == "verilog":
+                language = "systemverilog -defer -noassert"
             reads.append(f"read_{language}{includes} {filename}")
         return "\n".join(reads)
 
     _default_template = [
+        "plugin -i systemverilog",
         "verilog_defaults -push",
         "verilog_defaults -add -defer",
         "{read_files}",
         "verilog_defaults -pop",
         "attrmap -tocase keep -imap keep=\"true\" keep=1 -imap keep=\"false\" keep=0 -remove keep=0",
         "{yosys_cmds}",
+        "read_systemverilog -link",
         "synth_{target} {synth_opts} -top {build_name}",
         "write_{write_fmt} {write_opts} {output_name}.{synth_fmt}",
     ]
