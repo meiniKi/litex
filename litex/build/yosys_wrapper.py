@@ -77,11 +77,28 @@ class YosysWrapper():
         reads = []
         for path in self._platform.verilog_include_paths:
             includes += " -I" + path
+            
+        # Check if any file is systemverilog, then we use systemverilog front-end
+        # quick for now, as list is short.
+        # otherwise we read all without systemverilog front-end
+        
+        includes_systemverilog = False
+        for filename, language, library, *copy in self._platform.sources:
+            if language == "systemverilog":
+                includes_systemverilog = True
+                break
+
+        read_command = "systemverilog -defer -noassert" if includes_systemverilog else "verilog -sv"
+         
         for filename, language, library, *copy in self._platform.sources:
             # yosys has no such function read_systemverilog
             if language == "systemverilog" or language == "verilog":
-                language = "systemverilog -defer -noassert"
+                language = read_command
             reads.append(f"read_{language}{includes} {filename}")
+        
+        if includes_systemverilog:
+            reads.append("read_systemverilog -link")
+
         return "\n".join(reads)
     
     _default_template = [
@@ -92,7 +109,6 @@ class YosysWrapper():
         "verilog_defaults -pop",
         "attrmap -tocase keep -imap keep=\"true\" keep=1 -imap keep=\"false\" keep=0 -remove keep=0",
         "{yosys_cmds}",
-        "read_systemverilog -link",
         "synth_{target} {synth_opts} -top {build_name}",
         "write_{write_fmt} {write_opts} {output_name}.{synth_fmt}",
     ]
